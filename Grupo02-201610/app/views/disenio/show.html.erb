@@ -17,7 +17,7 @@
         <p><b>Precio solicitado: </b><%= p.precio_solicitado %></p>
       </div>
       <div class="col-md-8">
-        <%= image_tag p.picture.url, :class => "img-responsive"  if p.picture? %>
+        <%= image_tag p.picture, :class => "img-responsive"  if p.picture? %>
      </div>
     </div>
     <br>

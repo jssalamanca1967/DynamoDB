@@ -4,8 +4,9 @@ class SessionsController < ApplicationController
   end
 
   def create
-    @empresa = Empresa.find_by_email(params[:session][:email])
-    if @empresa && @empresa.authenticate(params[:session][:password])
+    @empresa = Empresady.find_by_email(params[:session][:email])
+    puts("-------------------------- " + params[:session][:password])
+    if @empresa && @empresa.password_digest == (params[:session][:password])
       session[:empresa_id] = @empresa.id
       redirect_to '/'
     else

@@ -1,28 +1,37 @@
 #!/usr/bin/env ruby
 class DisenioController < ApplicationController
   #before_action :require_empresa, only: [:index, :show]
+  $proyecto_actual
+  $empresa_actual
+
   def index
     @disenios = Disenio.all
   end
 
   def show
-    @disenio = Disenio.find(params[:id_disenio])
-    @proyecto = Proyecto.find(params[:id_proyecto])
-    @empresa = Empresa.find(@proyecto.empresa_id)
+    @disenio = Diseniody.find(params[:id_disenio])
+    @proyecto = Proyectody.find(params[:id_proyecto])
+    @empresa = Empresady.find_by_nombre_empresa(params[:nombre_empresa])
   end
 
   def new
     @disenio = Disenio.new
-    @proyecto = Proyecto.find(params[:id_proyecto])
-    @empresa = Empresa.find(@proyecto.empresa_id)
+    $proyecto_actual = Proyectody.find(params[:id_proyecto])
+    @proyecto = $proyecto_actual
+    $empresa_actual = Empresady.find_by_nombre_empresa(params[:nombre_empresa])
+    @empresa = $empresa_actual
   end
 
   def create
     @disenio = Disenio.new(disenio_params2)
-    @proyecto = Proyecto.find(@disenio.proyecto_id)
-    @empresa = Empresa.find(@proyecto.empresa_id)
-    if(@disenio.save)
-      procesarImagen(@disenio)
+    puts("- " + $proyecto_actual.nombre)
+    @proyecto = $proyecto_actual
+    @empresa = $empresa_actual
+    puts("--- " + $proyecto_actual.nombre)
+    @disenio2 = $proyecto_actual.disenios.create(:nombre_diseniador => @disenio.nombre_diseniador ,:apellido_diseniador => @disenio.apellido_diseniador ,:estado => @disenio.estado ,:email_diseniador => @disenio.email_diseniador ,:precio_solicitado => @disenio.precio_solicitado)
+    @disenio2.proyecto = $proyecto_actual
+    if(@disenio2.save)
+      procesarImagen(@disenio, @disenio2)
       redirect_to "/empresas/#{@empresa.nombre_empresa}/#{@proyecto.id}"
     else
       render 'new'
@@ -72,9 +81,10 @@ class DisenioController < ApplicationController
       params.require(:disenio).permit(:nombre_diseniador, :apellido_diseniador, :estado, :precio_solicitado, :email_diseniador, :proyecto_id, :picture)
     end
   private
-    def procesarImagen(disenio)
+    def procesarImagen(disenio, disenio2)
       Thread.new do
         @disenio = disenio
+        @disenio2 = disenio2
         print("Entro")
         direccion = "#{@disenio.picture.path}"
         print("Paso Direccion con correo #{@disenio.email_diseniador}")
@@ -107,14 +117,15 @@ class DisenioController < ApplicationController
         new_fname = "#{direccion}-[PROCESADA].png"
         ximg.write((new_fname))
         print("PROCESANDO #{direccion}\n")
-        @disenio.estado = "Disponible"
-        @disenio.save
+        @disenio2.estado = "Disponible"
+        @disenio2.picture = "#{@disenio.picture.url}"
+        @disenio2.save
         #SenderMail.enviar(@disenio).deliver_now
         #Awsmailer.enviar(@disenio)
-        @disenio = disenio
+
         puts(":v asdasdadasdasdasdas")
-        @proyecto = Proyecto.find(@disenio.proyecto_id)
-        @empresa = Empresa.find(@proyecto.empresa_id)
+        @proyecto = @disenio2.proyecto
+        @empresa = @proyecto.empresa
         # load credentials from disk
 	      ses = Aws::SES::Client.new(
 

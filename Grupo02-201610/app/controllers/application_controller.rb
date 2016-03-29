@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
 
   helper_method :current_empresa
   def current_empresa
-    @current_empresa ||= Empresa.find(session[:empresa_id]) if session[:empresa_id]
+    @current_empresa ||= Empresady.find(session[:empresa_id]) if session[:empresa_id]
   end
 
   def require_empresa

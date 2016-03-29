@@ -6,7 +6,7 @@ class EmpresaController < ApplicationController
   end
 
   def index
-    @empresas = Empresa.all
+    @empresas = Empresady.all
   end
 
   def new
@@ -14,14 +14,17 @@ class EmpresaController < ApplicationController
   end
 
   def create
-    @empresa = Empresa.new(empresa_params)
+    @empresa = Empresady.new(empresa_params)
+    @empresa.created_at = DateTime.now
     array = @empresa.nombre_empresa.scan(/\w+/)
     str = ""
     array.each { |x| str += x + "-" }
 
     str[str.length - 1] = ""
 
-    @empresa2 = Empresa.where(nombre_empresa_real: @empresa.nombre_empresa).ids
+    puts("---------------------------------------------- " +  @empresa.nombre_empresa)
+
+    @empresa2 = Empresady.where(nombre_empresa_real: @empresa.nombre_empresa).all
 
     puts (@empresa2.size)
 
@@ -33,7 +36,7 @@ class EmpresaController < ApplicationController
 
     @empresa.nombre_empresa = str
 
-    @empresasEMail = Empresa.where(email: @empresa.email).ids
+    @empresasEMail = Empresady.where(email: @empresa.email).all
 
     if @empresasEMail.size > 0
       puts("Ya existe una empresa con el email #{@empresa.email} empresa ya existe")
@@ -49,8 +52,9 @@ class EmpresaController < ApplicationController
 	end
 
   def show
-    @empresa = Empresa.find_by_nombre_empresa(params[:nombre_empresa])
-    @proyectos = @empresa.proyectos.paginate(page: params[:page])
+    @empresa = Empresady.find_by_nombre_empresa(params[:nombre_empresa])
+    @proyectos = @empresa.proyectos.all#.paginate(page: params[:page])
+
   end
 
   def edit
@@ -69,7 +73,7 @@ class EmpresaController < ApplicationController
   private
     def empresa_params
       # params.require(:empresa).permit(:nombre_empresa, :email)
-      params.require(:empresa).permit(:nombre_empresa, :email, :password)
+      params.require(:empresa).permit(:nombre_empresa, :email, :password_digest)
     end
 
 end

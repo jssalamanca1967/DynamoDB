@@ -1,22 +1,24 @@
 class ProyectoController < ApplicationController
   def index
-    @proyectos = Proyecto.all
+    @proyectos = Proyectody.all
   end
 
   def show
-    @proyecto = Proyecto.find(params[:id])
-    @empresa = Empresa.find(@proyecto.empresa_id)
-    @disenios = @proyecto.disenios.where(estado: "Disponible").order(created_at: :desc).paginate(page: params[:page])
+    @proyecto = Proyectody.find(params[:id])
+    @empresa = Empresady.find_by_nombre_empresa(params[:nombre_empresa])
+    ### NO ORDENA
+    @disenios = @proyecto.disenios.where(estado: "Disponible")#.order(created_at: :desc)#.paginate(page: params[:page])
   end
 
   def new
     @proyecto = Proyecto.new
-    @empresa = Empresa.find_by_nombre_empresa(params[:nombre_empresa])
+    @empresa = Empresady.find_by_nombre_empresa(params[:nombre_empresa])
   end
 
   def create
-    @proyecto = Proyecto.new(proyecto_params2)
-    @empresa = Empresa.find(current_empresa.id)
+    @empresa = Empresady.find(current_empresa.id)
+    @proyecto = @empresa.proyectos.create(proyecto_params)
+    @proyecto.empresa = @empresa
     if(@proyecto.save)
       redirect_to "/empresas/#{@empresa.nombre_empresa}"
     else
@@ -25,12 +27,12 @@ class ProyectoController < ApplicationController
   end
 
   def edit
-    @proyecto = Proyecto.find(params[:id])
+    @proyecto = Proyectody.find(params[:id])
   end
 
   def update
-    @proyecto = Proyecto.find(params[:id])
-    @empresa = Empresa.find(@proyecto.empresa_id)
+    @proyecto = Proyectody.find(params[:id])
+    @empresa = Empresady.find(@proyecto.empresa_id)
     if @proyecto.update_attributes(proyecto_params)
       redirect_to "/empresas/#{@empresa.nombre_empresa}"
     else
@@ -39,9 +41,9 @@ class ProyectoController < ApplicationController
   end
 
   def destroy
-    @proyecto = Proyecto.find(params[:id])
-    @empresa = Empresa.find(@proyecto.empresa_id)
-    Proyecto.delete(@proyecto)
+    @proyecto = Proyectody.find(params[:id])
+    @empresa = Empresady.find(@proyecto.empresa_id)
+    Proyectody.delete(@proyecto)
     redirect_to "/empresas/#{@empresa.nombre_empresa}"
   end
 
@@ -51,6 +53,6 @@ class ProyectoController < ApplicationController
     end
   private
     def proyecto_params2
-      params.require(:proyecto).permit(:nombre, :descripcion, :valor_pagar, :empresa_id)
+      params.require(:proyecto).permit(:nombre, :descripcion, :valor_pagar, :empresa_ids)
     end
 end
