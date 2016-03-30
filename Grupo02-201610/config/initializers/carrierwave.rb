@@ -7,3 +7,6 @@ CarrierWave.configure do |config|
   }
   config.fog_directory= ENV["AWSBucket"]
 end
+
+##asdasdasdasdasdasdasdasdasdasdasdasd
+#asdasddasndaskjndaskjdasdkasjdsakjdsakjbdsakbjdsakjbskjdab
