@@ -1,7 +1,7 @@
 class Proyectody
   include Dynamoid::Document
 
-  table :name => :proyecto, :key => :id, :read_capacity => 400, :write_capacity => 400
+  table :name => :proyecto, :key => :id, :read_capacity => 40, :write_capacity => 40
   field :descripcion
   field :nombre
   field :valor_pagar

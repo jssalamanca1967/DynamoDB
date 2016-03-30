@@ -3,6 +3,7 @@ class DisenioController < ApplicationController
   #before_action :require_empresa, only: [:index, :show]
   $proyecto_actual
   $empresa_actual
+  $disenio_edit
 
   def index
     @disenios = Disenio.all
@@ -24,31 +25,43 @@ class DisenioController < ApplicationController
 
   def create
     @disenio = Disenio.new(disenio_params2)
-    puts("- " + $proyecto_actual.nombre)
-    @proyecto = $proyecto_actual
-    @empresa = $empresa_actual
-    puts("--- " + $proyecto_actual.nombre)
-    @disenio2 = $proyecto_actual.disenios.create(:nombre_diseniador => @disenio.nombre_diseniador ,:apellido_diseniador => @disenio.apellido_diseniador ,:estado => @disenio.estado ,:email_diseniador => @disenio.email_diseniador ,:precio_solicitado => @disenio.precio_solicitado)
-    @disenio2.proyecto = $proyecto_actual
-    if(@disenio2.save)
-      procesarImagen(@disenio, @disenio2)
-      redirect_to "/empresas/#{@empresa.nombre_empresa}/#{@proyecto.id}"
+    if($disenio_nuevo == nil)
+      puts("- " + $proyecto_actual.nombre)
+      @proyecto = $proyecto_actual
+      @empresa = $empresa_actual
+      puts("--- " + $proyecto_actual.nombre)
+      @disenio2 = $proyecto_actual.disenios.create(:nombre_diseniador => @disenio.nombre_diseniador ,:apellido_diseniador => @disenio.apellido_diseniador ,:estado => @disenio.estado ,:email_diseniador => @disenio.email_diseniador ,:precio_solicitado => @disenio.precio_solicitado)
+      @disenio2.proyecto = $proyecto_actual
+      if(@disenio2.save)
+        procesarImagen(@disenio, @disenio2)
+        redirect_to "/empresas/#{@empresa.nombre_empresa}/#{@proyecto.id}"
+      else
+        render 'new'
+      end
     else
-      render 'new'
+      update(@disenio)
     end
   end
 
   def edit
     @disenio = Disenio.find(params[:id_disenio])
-    @proyecto = Proyecto.find(@disenio.proyecto_id)
-    @empresa = Empresa.find(@proyecto.empresa_id)
+    $disenio_edit = @disenio
+    @proyecto = @disenio.proyecto
+    @empresa = @proyecto.empresa
   end
 
-  def update
-    @disenio = Disenio.find(params[:id])
-    @proyecto = Proyecto.find(@disenio.proyecto_id)
-    @empresa = Empresa.find(@proyecto.empresa_id)
-    if @disenio.update_attributes(disenio_params)
+  def update(disenio)
+    @disenio_nuevo = disenio
+    @disenio = $disenio_edit
+    @disenio.nombre_diseniador = @disenio_nuevo.nombre_diseniador
+    @disenio.apellido_diseniador = @disenio_nuevo.apellido_diseniador
+    @disenio.estado = @disenio_nuevo.estado
+    @disenio.email_diseniador = @disenio_nuevo.email_diseniador
+    @disenio.precio_solicitado = @disenio_nuevo.precio_solicitado
+
+    @proyecto = @disenio.proyecto
+    @empresa = @proyecto.empresa
+    if @disenio.save
       redirect_to "/empresas/#{@empresa.nombre_empresa}/#{@proyecto.id}"
     else
       render 'edit'
@@ -123,9 +136,11 @@ class DisenioController < ApplicationController
         #SenderMail.enviar(@disenio).deliver_now
         #Awsmailer.enviar(@disenio)
 
-        puts(":v asdasdadasdasdasdas")
+
         @proyecto = @disenio2.proyecto
         @empresa = @proyecto.empresa
+
+        puts(":v asdasdadasdasdasdas")
         # load credentials from disk
 	      ses = Aws::SES::Client.new(
 

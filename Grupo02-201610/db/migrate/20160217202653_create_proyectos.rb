@@ -5,6 +5,7 @@ class CreateProyectos < ActiveRecord::Migration
       t.string :nombre
       t.integer :valor_pagar
       t.references :empresa
+      t.string :id_falso
 
       t.timestamps null: false
     end

@@ -1,4 +1,7 @@
 class ProyectoController < ApplicationController
+
+  $proyecto_a
+
   def index
     @proyectos = Proyectody.all
   end
@@ -16,24 +19,40 @@ class ProyectoController < ApplicationController
   end
 
   def create
-    @empresa = Empresady.find(current_empresa.id)
-    @proyecto = @empresa.proyectos.create(proyecto_params)
-    @proyecto.empresa = @empresa
-    if(@proyecto.save)
-      redirect_to "/empresas/#{@empresa.nombre_empresa}"
+    @proyecto_nuevo = Proyecto.new(proyecto_params)
+    if($proyecto_a == nil)
+      @empresa = Empresady.find(current_empresa.id)
+      @proyecto = @empresa.proyectos.create(proyecto_params)
+      @proyecto.empresa = @empresa
+
+      if(@proyecto.save)
+        redirect_to "/empresas/#{@empresa.nombre_empresa}"
+      else
+        render 'new'
+      end
     else
-      render 'new'
+      self.update(@proyecto_nuevo)
     end
   end
 
   def edit
-    @proyecto = Proyectody.find(params[:id])
+    @proyecto2 = Proyectody.find(params[:id])
+    $proyecto_a = @proyecto2
+    @proyecto = Proyecto.new(:nombre => @proyecto2.nombre ,:descripcion => @proyecto2.descripcion ,:valor_pagar => @proyecto2.valor_pagar)
   end
 
-  def update
-    @proyecto = Proyectody.find(params[:id])
-    @empresa = Empresady.find(@proyecto.empresa_id)
-    if @proyecto.update_attributes(proyecto_params)
+  def update(proyecto_nuevo)
+    @proyecto_nuevo = proyecto_nuevo
+
+    @proyecto = $proyecto_a
+
+    @proyecto.nombre = @proyecto_nuevo.nombre
+    @proyecto.descripcion = @proyecto_nuevo.descripcion
+    @proyecto.valor_pagar = @proyecto_nuevo.valor_pagar
+
+    @empresa = @proyecto.empresa
+    if @proyecto.save
+      $proyecto_a = nil
       redirect_to "/empresas/#{@empresa.nombre_empresa}"
     else
       render 'edit'
@@ -42,8 +61,12 @@ class ProyectoController < ApplicationController
 
   def destroy
     @proyecto = Proyectody.find(params[:id])
-    @empresa = Empresady.find(@proyecto.empresa_id)
-    Proyectody.delete(@proyecto)
+    @empresa = Empresady.find_by_nombre_empresa(params[:nombre_empresa])
+    @proyecto.disenios.each do |d|
+      d.delete
+    end
+    @proyecto.delete
+    #Proyectody.delete(@proyecto)
     redirect_to "/empresas/#{@empresa.nombre_empresa}"
   end
 
@@ -55,4 +78,5 @@ class ProyectoController < ApplicationController
     def proyecto_params2
       params.require(:proyecto).permit(:nombre, :descripcion, :valor_pagar, :empresa_ids)
     end
+
 end

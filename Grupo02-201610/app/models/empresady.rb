@@ -1,7 +1,7 @@
 class Empresady
   include Dynamoid::Document
 
-  table :name => :empresa, :key => :id, :read_capacity => 400, :write_capacity => 400
+  table :name => :empresa, :key => :id, :read_capacity => 40, :write_capacity => 40
   field :password_digest
   field :email
   field :nombre_empresa
