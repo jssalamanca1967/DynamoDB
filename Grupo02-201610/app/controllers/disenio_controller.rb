@@ -53,6 +53,7 @@ class DisenioController < ApplicationController
   def update(disenio)
     @disenio_nuevo = disenio
     @disenio = $disenio_edit
+
     @disenio.nombre_diseniador = @disenio_nuevo.nombre_diseniador
     @disenio.apellido_diseniador = @disenio_nuevo.apellido_diseniador
     @disenio.estado = @disenio_nuevo.estado
@@ -62,6 +63,7 @@ class DisenioController < ApplicationController
     @proyecto = @disenio.proyecto
     @empresa = @proyecto.empresa
     if @disenio.save
+      $disenio_edit = nil
       redirect_to "/empresas/#{@empresa.nombre_empresa}/#{@proyecto.id}"
     else
       render 'edit'
